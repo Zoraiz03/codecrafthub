@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>CodeCraftHub — Learning Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg: #080c14;
+    --surface: #0e1420;
+    --surface2: #141b2d;
+    --border: #1e2a42;
+    --accent: #4f8ef7;
+    --accent2: #7c3aed;
+    --accent-glow: rgba(79,142,247,0.15);
+    --text: #e8edf5;
+    --text-muted: #6b7a99;
+    --text-dim: #3a4560;
+    --green: #10b981;
+    --orange: #f59e0b;
+    --red: #ef4444;
+    --green-bg: rgba(16,185,129,0.1);
+    --orange-bg: rgba(245,158,11,0.1);
+    --red-bg: rgba(239,68,68,0.1);
+    --radius: 16px;
+    --radius-sm: 10px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(79,142,247,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(79,142,247,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  body::after {
+    content: '';
+    position: fixed;
+    top: -200px;
+    right: -200px;
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(79,142,247,0.08) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    padding: 0 40px;
+    height: 72px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+    background: rgba(8,12,20,0.85);
+    backdrop-filter: blur(20px);
+  }
+
+  .logo { display: flex; align-items: center; gap: 12px; }
+
+  .logo-icon {
+    width: 36px; height: 36px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+    box-shadow: 0 0 20px rgba(79,142,247,0.3);
+  }
+
+  .logo-text {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800; font-size: 20px; letter-spacing: -0.5px;
+    background: linear-gradient(135deg, #fff 40%, var(--accent));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+
+  .stat-pill {
+    display: flex; align-items: center; gap: 8px;
+    padding: 6px 14px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    font-size: 13px; color: var(--text-muted);
+  }
+  .stat-pill span { color: var(--text); font-weight: 600; font-family: 'Syne', sans-serif; }
+
+  main {
+    position: relative; z-index: 1;
+    max-width: 1400px; margin: 0 auto;
+    padding: 40px;
+    display: grid;
+    grid-template-columns: 380px 1fr;
+    gap: 32px;
+    align-items: start;
+  }
+
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    position: sticky;
+    top: 104px;
+  }
+
+  .panel-header {
+    padding: 24px 28px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+
+  .panel-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 16px; }
+
+  .panel-badge {
+    font-size: 11px; font-weight: 600;
+    padding: 3px 10px; border-radius: 100px;
+    background: var(--accent-glow); color: var(--accent);
+    border: 1px solid rgba(79,142,247,0.2);
+    letter-spacing: 0.5px; text-transform: uppercase;
+  }
+  .panel-badge.edit-mode {
+    background: rgba(124,58,237,0.1); color: #a78bfa;
+    border-color: rgba(124,58,237,0.2);
+  }
+
+  .panel-body { padding: 24px 28px; }
+  .form-group { margin-bottom: 18px; }
+
+  label {
+    display: block; font-size: 12px; font-weight: 500;
+    color: var(--text-muted); margin-bottom: 8px;
+    letter-spacing: 0.5px; text-transform: uppercase;
+  }
+
+  input, textarea, select {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 11px 14px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px; outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    -webkit-appearance: none;
+  }
+  input:focus, textarea:focus, select:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(79,142,247,0.1);
+  }
+  textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
+  select option { background: var(--surface2); }
+
+  .select-wrap { position: relative; }
+  .select-wrap::after {
+    content: '▾'; position: absolute;
+    right: 14px; top: 50%; transform: translateY(-50%);
+    color: var(--text-muted); pointer-events: none; font-size: 12px;
+  }
+
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    gap: 8px; padding: 11px 20px;
+    border-radius: var(--radius-sm);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px; font-weight: 500;
+    cursor: pointer; border: none;
+    transition: all 0.2s;
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, var(--accent), #3b7be8);
+    color: white; width: 100%;
+    box-shadow: 0 4px 20px rgba(79,142,247,0.25);
+  }
+  .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 24px rgba(79,142,247,0.35); }
+
+  .btn-secondary {
+    background: var(--surface2); color: var(--text-muted);
+    border: 1px solid var(--border); width: 100%; margin-top: 8px;
+  }
+  .btn-secondary:hover { color: var(--text); border-color: #2e3d5a; }
+
+  .btn-edit {
+    background: rgba(124,58,237,0.1); color: #a78bfa;
+    border: 1px solid rgba(124,58,237,0.2);
+    padding: 7px 14px; font-size: 13px; border-radius: 8px;
+  }
+  .btn-edit:hover { background: rgba(124,58,237,0.2); }
+
+  .btn-delete {
+    background: rgba(239,68,68,0.1); color: #f87171;
+    border: 1px solid rgba(239,68,68,0.15);
+    padding: 7px 14px; font-size: 13px; border-radius: 8px;
+  }
+  .btn-delete:hover { background: rgba(239,68,68,0.2); }
+
+  .stats-row {
+    display: grid; grid-template-columns: repeat(3,1fr);
+    gap: 16px; margin-bottom: 28px;
+  }
+
+  .stat-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 20px 22px;
+    display: flex; align-items: center; gap: 14px;
+    transition: border-color 0.2s;
+  }
+  .stat-card:hover { border-color: #2e3d5a; }
+
+  .stat-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+
+  .stat-num {
+    font-family: 'Syne', sans-serif;
+    font-size: 28px; font-weight: 800; line-height: 1; margin-bottom: 4px;
+  }
+  .stat-label { font-size: 12px; color: var(--text-muted); }
+
+  .section-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 24px;
+  }
+
+  .section-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700; font-size: 22px; letter-spacing: -0.5px;
+  }
+  .section-title span { color: var(--text-muted); font-weight: 400; font-size: 16px; margin-left: 8px; }
+
+  .courses-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px,1fr));
+    gap: 16px;
+  }
+
+  .course-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 22px;
+    display: flex; flex-direction: column; gap: 14px;
+    transition: all 0.25s;
+    animation: cardIn 0.35s ease both;
+    position: relative; overflow: hidden;
+  }
+  .course-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0;
+    height: 2px; opacity: 0; transition: opacity 0.2s;
+  }
+  .course-card:hover { border-color: #2e3d5a; transform: translateY(-2px); box-shadow: 0 8px 32px rgba(0,0,0,0.3); }
+  .course-card:hover::before { opacity: 1; }
+  .course-card.status-not-started::before { background: var(--red); }
+  .course-card.status-in-progress::before { background: var(--orange); }
+  .course-card.status-completed::before { background: var(--green); }
+
+  .card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+
+  .course-name { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 15px; line-height: 1.3; }
+
+  .status-badge {
+    flex-shrink: 0; font-size: 11px; font-weight: 600;
+    padding: 4px 10px; border-radius: 100px; letter-spacing: 0.3px; white-space: nowrap;
+  }
+  .badge-not-started { background: var(--red-bg); color: #f87171; border: 1px solid rgba(239,68,68,0.2); }
+  .badge-in-progress { background: var(--orange-bg); color: #fbbf24; border: 1px solid rgba(245,158,11,0.2); }
+  .badge-completed { background: var(--green-bg); color: #34d399; border: 1px solid rgba(16,185,129,0.2); }
+
+  .course-desc { font-size: 13px; color: var(--text-muted); line-height: 1.6; flex: 1; }
+
+  .card-meta { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-dim); }
+
+  .card-actions { display: flex; gap: 8px; padding-top: 14px; border-top: 1px solid var(--border); }
+
+  .empty-state { grid-column: 1/-1; text-align: center; padding: 80px 40px; }
+  .empty-icon { font-size: 48px; margin-bottom: 16px; opacity: 0.4; }
+  .empty-title { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 700; color: var(--text-dim); margin-bottom: 8px; }
+  .empty-sub { font-size: 14px; color: var(--text-dim); }
+
+  .loading-wrap {
+    grid-column: 1/-1; display: flex; align-items: center;
+    justify-content: center; padding: 60px; gap: 12px;
+    color: var(--text-muted); font-size: 14px;
+  }
+  .spinner {
+    width: 20px; height: 20px;
+    border: 2px solid var(--border); border-top-color: var(--accent);
+    border-radius: 50%; animation: spin 0.7s linear infinite;
+  }
+
+  #toast {
+    position: fixed; bottom: 32px; right: 32px; z-index: 9999;
+    display: flex; align-items: center; gap: 12px;
+    padding: 14px 20px; border-radius: var(--radius-sm);
+    font-size: 14px; font-weight: 500; min-width: 280px;
+    backdrop-filter: blur(12px);
+    transform: translateY(80px); opacity: 0;
+    transition: all 0.35s cubic-bezier(0.34,1.56,0.64,1);
+    pointer-events: none;
+  }
+  #toast.show { transform: translateY(0); opacity: 1; }
+  #toast.success { background: rgba(16,185,129,0.15); border: 1px solid rgba(16,185,129,0.3); color: #34d399; }
+  #toast.error { background: rgba(239,68,68,0.15); border: 1px solid rgba(239,68,68,0.3); color: #f87171; }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @keyframes cardIn { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+
+  @media (max-width: 900px) {
+    main { grid-template-columns: 1fr; padding: 24px 20px; }
+    .panel { position: static; }
+    header { padding: 0 20px; }
+    .stats-row { grid-template-columns: 1fr 1fr; }
+    .stat-pill { display: none; }
+  }
+  @media (max-width: 500px) { .stats-row { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-icon">⚡</div>
+    <div class="logo-text">CodeCraftHub</div>
+  </div>
+  <div class="stat-pill">Total courses: <span id="header-count">0</span></div>
+</header>
+
+<main>
+  <!-- FORM PANEL -->
+  <aside class="panel">
+    <div class="panel-header">
+      <div class="panel-title" id="form-title">Add New Course</div>
+      <div class="panel-badge" id="form-badge">NEW</div>
+    </div>
+    <div class="panel-body">
+      <input type="hidden" id="edit-id"/>
+
+      <div class="form-group">
+        <label>Course Name</label>
+        <input type="text" id="f-name" placeholder="e.g. Python for Data Science"/>
+      </div>
+      <div class="form-group">
+        <label>Description</label>
+        <textarea id="f-desc" placeholder="What will you learn?"></textarea>
+      </div>
+      <div class="form-group">
+        <label>Target Date</label>
+        <input type="date" id="f-date"/>
+      </div>
+      <div class="form-group">
+        <label>Status</label>
+        <div class="select-wrap">
+          <select id="f-status">
+            <option value="Not Started">Not Started</option>
+            <option value="In Progress">In Progress</option>
+            <option value="Completed">Completed</option>
+          </select>
+        </div>
+      </div>
+
+      <button class="btn btn-primary" onclick="submitForm()">
+        <span id="btn-icon">＋</span>
+        <span id="btn-text">Add Course</span>
+      </button>
+      <button class="btn btn-secondary" id="cancel-btn" onclick="resetForm()" style="display:none">
+        ✕ Cancel Edit
+      </button>
+    </div>
+  </aside>
+
+  <!-- COURSES SECTION -->
+  <section>
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-dot" style="background:var(--red)"></div>
+        <div><div class="stat-num" id="stat-ns">0</div><div class="stat-label">Not Started</div></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-dot" style="background:var(--orange)"></div>
+        <div><div class="stat-num" id="stat-ip">0</div><div class="stat-label">In Progress</div></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-dot" style="background:var(--green)"></div>
+        <div><div class="stat-num" id="stat-cp">0</div><div class="stat-label">Completed</div></div>
+      </div>
+    </div>
+
+    <div class="section-header">
+      <div class="section-title">My Courses <span id="course-count-label"></span></div>
+    </div>
+
+    <div class="courses-grid" id="courses-grid">
+      <div class="loading-wrap"><div class="spinner"></div> Loading courses…</div>
+    </div>
+  </section>
+</main>
+
+<div id="toast"></div>
+
+<script>
+const API = 'http://localhost:5000/api/courses';
+
+async function loadCourses() {
+  const grid = document.getElementById('courses-grid');
+  grid.innerHTML = '<div class="loading-wrap"><div class="spinner"></div> Loading courses…</div>';
+  try {
+    const res = await fetch(API);
+    const data = await res.json();
+    const courses = data.courses || [];
+    renderCourses(courses);
+    updateStats(courses);
+  } catch(e) {
+    grid.innerHTML = '<div class="empty-state"><div class="empty-icon">⚠️</div><div class="empty-title">Cannot connect to server</div><div class="empty-sub">Make sure your Flask API is running on port 5000</div></div>';
+  }
+}
+
+function renderCourses(courses) {
+  document.getElementById('header-count').textContent = courses.length;
+  document.getElementById('course-count-label').textContent = courses.length ? `(${courses.length})` : '';
+  const grid = document.getElementById('courses-grid');
+
+  if (!courses.length) {
+    grid.innerHTML = '<div class="empty-state"><div class="empty-icon">📚</div><div class="empty-title">No courses yet</div><div class="empty-sub">Add your first course using the form on the left</div></div>';
+    return;
+  }
+
+  grid.innerHTML = courses.map((c, i) => {
+    const sc = c.status.toLowerCase().replace(/ /g,'-');
+    return `
+    <div class="course-card status-${sc}" style="animation-delay:${i*0.05}s">
+      <div class="card-top">
+        <div class="course-name">${esc(c.name)}</div>
+        <div class="status-badge badge-${sc}">${esc(c.status)}</div>
+      </div>
+      <div class="course-desc">${esc(c.description)}</div>
+      <div class="card-meta">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="4" width="18" height="18" rx="2"/>
+          <line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/>
+          <line x1="3" y1="10" x2="21" y2="10"/>
+        </svg>
+        Target: ${fmtDate(c.target_date)}
+      </div>
+      <div class="card-actions">
+        <button class="btn btn-edit" onclick="editCourse(${c.id})">✏️ Edit</button>
+        <button class="btn btn-delete" onclick="deleteCourse(${c.id},'${esc(c.name)}')">🗑 Delete</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function updateStats(courses) {
+  document.getElementById('stat-ns').textContent = courses.filter(c=>c.status==='Not Started').length;
+  document.getElementById('stat-ip').textContent = courses.filter(c=>c.status==='In Progress').length;
+  document.getElementById('stat-cp').textContent = courses.filter(c=>c.status==='Completed').length;
+}
+
+async function submitForm() {
+  const id   = document.getElementById('edit-id').value;
+  const name = document.getElementById('f-name').value.trim();
+  const desc = document.getElementById('f-desc').value.trim();
+  const date = document.getElementById('f-date').value;
+  const stat = document.getElementById('f-status').value;
+
+  if (!name || !desc || !date) { showToast('Please fill in all fields','error'); return; }
+
+  const url    = id ? `${API}/${id}` : API;
+  const method = id ? 'PUT' : 'POST';
+
+  try {
+    const res  = await fetch(url, { method, headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ name, description:desc, target_date:date, status:stat }) });
+    const data = await res.json();
+    if (data.success) {
+      showToast(id ? '✅ Course updated!' : '✅ Course added!', 'success');
+      resetForm(); loadCourses();
+    } else { showToast(data.error || 'Something went wrong','error'); }
+  } catch(e) { showToast('Cannot connect to server','error'); }
+}
+
+async function editCourse(id) {
+  try {
+    const res  = await fetch(`${API}/${id}`);
+    const data = await res.json();
+    const c    = data.course;
+    document.getElementById('edit-id').value  = c.id;
+    document.getElementById('f-name').value   = c.name;
+    document.getElementById('f-desc').value   = c.description;
+    document.getElementById('f-date').value   = c.target_date;
+    document.getElementById('f-status').value = c.status;
+    document.getElementById('form-title').textContent = 'Edit Course';
+    document.getElementById('form-badge').textContent = 'EDIT';
+    document.getElementById('form-badge').classList.add('edit-mode');
+    document.getElementById('btn-icon').textContent = '✓';
+    document.getElementById('btn-text').textContent = 'Update Course';
+    document.getElementById('cancel-btn').style.display = 'block';
+    document.querySelector('.panel').scrollIntoView({behavior:'smooth',block:'start'});
+  } catch(e) { showToast('Failed to load course','error'); }
+}
+
+async function deleteCourse(id, name) {
+  if (!confirm(`Delete "${name}"?\n\nThis cannot be undone.`)) return;
+  try {
+    const res  = await fetch(`${API}/${id}`, {method:'DELETE'});
+    const data = await res.json();
+    if (data.success) { showToast('🗑 Course deleted','success'); loadCourses(); }
+    else { showToast(data.error||'Delete failed','error'); }
+  } catch(e) { showToast('Cannot connect to server','error'); }
+}
+
+function resetForm() {
+  ['f-name','f-desc','f-date'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('f-status').value = 'Not Started';
+  document.getElementById('edit-id').value  = '';
+  document.getElementById('form-title').textContent = 'Add New Course';
+  document.getElementById('form-badge').textContent = 'NEW';
+  document.getElementById('form-badge').classList.remove('edit-mode');
+  document.getElementById('btn-icon').textContent = '＋';
+  document.getElementById('btn-text').textContent = 'Add Course';
+  document.getElementById('cancel-btn').style.display = 'none';
+}
+
+let toastTimer;
+function showToast(msg, type='success') {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = `show ${type}`;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+function esc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function fmtDate(d) {
+  if (!d) return '—';
+  const [y,m,day] = d.split('-');
+  const mo = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return `${mo[parseInt(m)-1]} ${parseInt(day)}, ${y}`;
+}
+
+loadCourses();
+</script>
+</body>
+</html>
